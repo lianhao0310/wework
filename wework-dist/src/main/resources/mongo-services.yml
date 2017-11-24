@@ -1,0 +1,15 @@
+version: '2.1'
+services:
+    mongo:
+        image: mongo:3.4.6
+        container_name: mongo
+        restart: always
+        mem_limit: 2g
+        environment:
+          - TZ=Asia/Shanghai
+        volumes:
+          - /usr/docker-data/db/mongo:/data/db
+        ports:
+          - "27016:27017"
+        command: mongod --bind_ip 0.0.0.0
+

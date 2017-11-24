@@ -1,0 +1,8 @@
+version: '2.1'
+services:
+    ws:
+        container_name: wework-ws
+        restart: always
+        extends:
+            file: wework-services.yml
+            service: ws

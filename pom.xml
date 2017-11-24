@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.emily</groupId>
+	<artifactId>wework</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>wework</name>
+	<description>wework project for Spring Boot</description>
+
+	<parent>
+		<groupId>com.alice.emily</groupId>
+		<artifactId>emily-parent</artifactId>
+		<version>2.0.0</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+	<!--Add repositories-->
+	<repositories>
+		<repository>
+			<id>haoch-maven-snapshot-repository</id>
+			<name>haoch-maven-snapshot-repository</name>
+			<url>https://raw.github.com/lianhao0310/maven/snapshot/</url>
+		</repository>
+		<repository>
+			<id>haoch-maven-release-repository</id>
+			<name>haoch-maven-release-repository</name>
+			<url>https://raw.github.com/lianhao0310/maven/release/</url>
+		</repository>
+	</repositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>wework-common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>wework-service</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>wework-repo</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>wework-ws</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>wework-dist</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alice.emily</groupId>
+			<artifactId>emily-core</artifactId>
+		</dependency>
+	</dependencies>
+
+	<modules>
+		<module>wework-common</module>
+		<module>wework-repo</module>
+		<module>wework-service</module>
+		<module>wework-ws</module>
+		<module>wework-dist</module>
+	</modules>
+
+
+</project>

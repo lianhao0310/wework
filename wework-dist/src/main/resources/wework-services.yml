@@ -1,0 +1,13 @@
+version: '2.1'
+services:
+    ws:
+        build:
+            context: .
+            dockerfile: ./dockerfile/wework-ws
+        image: wework-ws:@project.version@
+        restart: always
+        mem_limit: 4g
+        environment:
+            - TZ=Asia/Shanghai
+        ports:
+            - "8080:8080"

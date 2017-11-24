@@ -1,0 +1,9 @@
+FROM openjdk:8-jdk-alpine
+
+WORKDIR /wework
+
+EXPOSE 8080
+
+COPY ./lib/wework-ws-@project.version@.jar /wework/wework-ws.jar
+
+ENTRYPOINT ["java","-jar","/wework/wework-ws.jar"]
