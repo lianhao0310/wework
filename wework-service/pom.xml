@@ -3,22 +3,30 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>wework-service</artifactId>
-	<dependencies>
-		<dependency>
-			<groupId>org.jsoup</groupId>
-			<artifactId>jsoup</artifactId>
-			<version>1.9.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.emily</groupId>
-			<artifactId>wework-common</artifactId>
-		</dependency>
-	</dependencies>
+
 
 	<parent>
 		<groupId>com.emily</groupId>
 		<artifactId>wework</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.emily</groupId>
+			<artifactId>wework-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>${jsoup.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/net.coobird/thumbnailator -->
+		<dependency>
+			<groupId>net.coobird</groupId>
+			<artifactId>thumbnailator</artifactId>
+			<version>${thumbnailator.version}</version>
+		</dependency>
+	</dependencies>
 
 </project>

@@ -34,8 +34,10 @@ public class SogouServiceImpl implements SogouService {
         Document doc = Jsoup.parse(html);
         ArticleDto articleDto = new ArticleDto();
         Elements elements = doc.getElementsByClass("news-list").get(0).children();
-        for (Element element:elements) {
-            if(element.getElementsByTag("h3").text().equals(title)) {
+        for (Element element : elements) {
+            String eTitle = element.getElementsByTag("h3").text().replaceAll("(?i)[^a-zA-Z0-9\u4E00-\u9FA5]", "");
+            if (eTitle.equals(title.replaceAll("(?i)[^a-zA-Z0-9\u4E00-\u9FA5]", ""))
+                    && element.getElementsByClass("account").get(0).text().equals(name)) {
                 //获取articleId
                 String articleId = element.attr("id");
 
@@ -49,8 +51,7 @@ public class SogouServiceImpl implements SogouService {
                     //根据sogou获取封面图片地址
                     String cover = doc.getElementById(idPrefix + "_img_" + idSuffix).getElementsByTag("img").attr("src");
                     String[] querys = URLUtils.getURL(cover).getQuery().split("&");
-
-                    for (String query:querys) {
+                    for (String query : querys) {
                         if (query.startsWith("url=")) {
                             //根据sogou图片地址url参数获取封面图片
                             cover = query.replace("url=", "");

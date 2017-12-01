@@ -7,4 +7,6 @@ import com.emily.dto.ArticleDto;
  */
 public interface WeixinService {
     ArticleDto getArticleByUrl(String url)  throws Exception ;
+
+    byte[] getThumbsByUrl(String url) throws Exception;
 }

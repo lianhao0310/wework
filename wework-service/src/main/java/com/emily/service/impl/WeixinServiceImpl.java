@@ -2,10 +2,12 @@ package com.emily.service.impl;
 
 import com.alice.emily.utils.HTTP;
 import com.alice.emily.utils.LOG;
+import com.alice.emily.utils.URLUtils;
 import com.alice.emily.utils.logging.Logger;
 import com.emily.dto.ArticleDto;
 import com.emily.service.SogouService;
 import com.emily.service.WeixinService;
+import net.coobird.thumbnailator.Thumbnails;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -13,6 +15,10 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +56,16 @@ public class WeixinServiceImpl implements WeixinService {
         List<String> images = new ArrayList<String>();
         Elements elementImages = doc.select("img[data-src]");
         for (Element element : elementImages) {
-            images.add(element.attributes().get("data-src"));
+            String image = element.attributes().get("data-src");
+            String[] querys = URLUtils.getURL(image).getQuery().split("&");
+            for (String query : querys) {
+                if (query.startsWith("url=")) {
+                    //根据sogou图片地址url参数获取封面图片
+                    image = query.replace("url=", "");
+                    break;
+                }
+            }
+            images.add(image);
         }
 
         //视频
@@ -60,13 +75,42 @@ public class WeixinServiceImpl implements WeixinService {
             videos.add(element.attributes().get("data-src"));
         }
         //原文链接
-        String source = doc.getElementById("js_sg_bar").children().get(0).attr("href");
+        if (doc.getElementById("js_sg_bar").children().size() > 0) {
+            String source = doc.getElementById("js_sg_bar").children().get(0).attr("href");
+            articleDto.setSource(source);
+        }
+
         articleDto.setImages(images);
         articleDto.setVideos(videos);
         articleDto.setName(name);
         articleDto.setTitle(title);
         articleDto.setDate(date);
-        articleDto.setSource(source);
         return articleDto;
+    }
+
+    @Override
+    public byte[] getThumbsByUrl(@NotNull String url) throws Exception {
+
+        String fmt = "jpg";
+        String[] querys = URLUtils.getURL(url).getQuery().split("&");
+        for (String query : querys) {
+            if (query.startsWith("wx_fmt=")) {
+                fmt = query.replace("wx_fmt=", "");
+                break;
+            }
+        }
+
+        byte[] data;
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Thumbnails.of(new URL(url))
+                .scale(1.0d)
+                .outputFormat(fmt)
+                .imageType(BufferedImage.TYPE_INT_ARGB)
+                .toOutputStream(outputStream);
+
+        outputStream.flush();
+        data = outputStream.toByteArray();
+        outputStream.close();
+        return data;
     }
 }
