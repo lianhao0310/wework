@@ -57,14 +57,6 @@ public class WeixinServiceImpl implements WeixinService {
         Elements elementImages = doc.select("img[data-src]");
         for (Element element : elementImages) {
             String image = element.attributes().get("data-src");
-            String[] querys = URLUtils.getURL(image).getQuery().split("&");
-            for (String query : querys) {
-                if (query.startsWith("url=")) {
-                    //根据sogou图片地址url参数获取封面图片
-                    image = query.replace("url=", "");
-                    break;
-                }
-            }
             images.add(image);
         }
 
@@ -74,14 +66,19 @@ public class WeixinServiceImpl implements WeixinService {
         for (Element element : elementVideos) {
             videos.add(element.attributes().get("data-src"));
         }
+
         //原文链接
         if (doc.getElementById("js_sg_bar").children().size() > 0) {
             String source = doc.getElementById("js_sg_bar").children().get(0).attr("href");
             articleDto.setSource(source);
         }
 
-        articleDto.setImages(images);
-        articleDto.setVideos(videos);
+        if (images.size()>0){
+            articleDto.setImages(images);
+        }
+        if(videos.size()>0){
+            articleDto.setVideos(videos);
+        }
         articleDto.setName(name);
         articleDto.setTitle(title);
         articleDto.setDate(date);
@@ -93,10 +90,12 @@ public class WeixinServiceImpl implements WeixinService {
 
         String fmt = "jpg";
         String[] querys = URLUtils.getURL(url).getQuery().split("&");
-        for (String query : querys) {
-            if (query.startsWith("wx_fmt=")) {
-                fmt = query.replace("wx_fmt=", "");
-                break;
+        if (querys.length > 0) {
+            for (String query : querys) {
+                if (query.startsWith("wx_fmt=")) {
+                    fmt = query.replace("wx_fmt=", "");
+                    break;
+                }
             }
         }
 

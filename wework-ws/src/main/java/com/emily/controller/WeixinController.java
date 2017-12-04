@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import java.awt.AlphaComposite;
@@ -25,9 +27,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -51,7 +56,6 @@ public class WeixinController {
      */
     @ApiOperation("获取文章信息")
     @GetMapping("article")
-    @ApiIgnore
     public ResponseData<ArticleDto> getArticle(@RequestParam("url") @NotNull String url) {
         try {
             return new ResponseData(weixinService.getArticleByUrl(url));
@@ -67,14 +71,24 @@ public class WeixinController {
     public void getImg(@RequestParam(value = "url") @NotNull String url, HttpServletResponse response) {
         try {
             String fmt = "jpg";
-            String[] querys = URLUtils.getURL(url).getQuery().split("&");
-            for (String query : querys) {
-                if (query.startsWith("wx_fmt=")) {
-                    fmt = query.replace("wx_fmt=", "");
-                    break;
+            if (URLUtils.getURL(url).getQuery()!=null) {
+                String[] querys = URLUtils.getURL(url).getQuery().split("&");
+                for (String query : querys) {
+                    if (query.startsWith("wx_fmt=")) {
+                        fmt = query.replace("wx_fmt=", "");
+                        break;
+                    }
+                }
+            } else {
+                String[] querys = url.split("/");
+                if(querys[querys.length-1].contains(".")){
+                    String query = querys[querys.length-1];
+                    String[] fmts = query.split("\\.");
+                    fmt = fmts[1];
                 }
             }
-            if (!"jpg".equals(fmt) || !"jpeg".equals(fmt) || !"png".equals(fmt) || !"gif".equals(fmt)) {
+
+            if (!"jpg".equals(fmt) && !"png".equals(fmt) && !"gif".equals(fmt)) {
                 fmt = "jpg";
             }
             DataOutputStream dout = new DataOutputStream(response.getOutputStream());
@@ -89,24 +103,22 @@ public class WeixinController {
         }
     }
 
-    @ApiOperation("根据Url获取图片")
     @GetMapping("/image/gif")
+    @ApiIgnore
     @ResponseBody
     public void getGif(@RequestParam(value = "url") @NotNull String url, HttpServletResponse response) {
+
+        byte[] imageByteArray = null;
         try {
+            imageByteArray = createByteArray(url);
             DataOutputStream dout = new DataOutputStream(response.getOutputStream());
-            BufferedImage image = ImageIO.read(new URL(url));
-            Graphics2D g = image.createGraphics();
-            try {
-                // Here's the trick, with DstOver we'll paint "behind" the original image
-                g.setComposite(AlphaComposite.DstOver);
-                g.setColor(Color.GRAY);
-                g.fill(new Rectangle(0, 0, image.getWidth(), image.getHeight()));
-            } finally {
-                g.dispose();
-            }
+            InputStream in = new ByteArrayInputStream(imageByteArray);
+            BufferedImage image = ImageIO.read(in);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             boolean flag = ImageIO.write(image, "GIF", out);
+            if (!flag) {
+                System.out.println("Could not save as gif, image had too many colors");
+            }
             byte[] b = out.toByteArray();
             dout.write(b);
             out.close();
@@ -115,8 +127,8 @@ public class WeixinController {
         }
     }
 
-    @ApiOperation("根据Url获取图片")
     @GetMapping("/image/gif2")
+    @ApiIgnore
     @ResponseBody
     public void getGif2(@RequestParam(value = "url") @NotNull String url, HttpServletResponse response) {
         try {
@@ -142,6 +154,39 @@ public class WeixinController {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+    }
+
+    public void saveAnimatedGifFramePartsToImage(String input, String outDir) throws IOException {
+        ImageReader reader = ImageIO.getImageReadersByFormatName("gif").next();
+        try (ImageInputStream ciis = ImageIO.createImageInputStream(new File(input))) {
+            reader.setInput(ciis, false);
+            for (int i = 0, noi = reader.getNumImages(true); i < noi; i++) {
+                BufferedImage image = reader.read(i);
+                ImageIO.write(image, "GIF", new File(new File(outDir), i + ".gif"));
+            }
+        }
+    }
+
+    // Constraint:  This method simulates how the image is originally received
+    private byte[] createByteArray(String urlString) throws IOException {
+        URL url = new URL(urlString);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        InputStream is = null;
+        try {
+            is = url.openStream();
+            byte[] byteChunk = new byte[4096];
+            int n;
+            while ((n = is.read(byteChunk)) > 0) {
+                baos.write(byteChunk, 0, n);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+        return baos.toByteArray();
     }
 
 }

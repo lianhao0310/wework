@@ -29,42 +29,47 @@ public class SogouServiceImpl implements SogouService {
         params.put("query", title);
         params.put("ie", "utf8");
         params.put("_sug_", "n");
-        HTTP.HttpRequest request = HTTP.get("http://weixin.sogou.com/weixin", params, true);
-        String html = request.body();
-        Document doc = Jsoup.parse(html);
+        String[] pages = {"1","2","3","4","5"};
         ArticleDto articleDto = new ArticleDto();
-        Elements elements = doc.getElementsByClass("news-list").get(0).children();
-        for (Element element : elements) {
-            String eTitle = element.getElementsByTag("h3").text().replaceAll("(?i)[^a-zA-Z0-9\u4E00-\u9FA5]", "");
-            if (eTitle.equals(title.replaceAll("(?i)[^a-zA-Z0-9\u4E00-\u9FA5]", ""))
-                    && element.getElementsByClass("account").get(0).text().equals(name)) {
-                //获取articleId
-                String articleId = element.attr("id");
+        for (String page:pages){
+            params.put("page", page);
+            HTTP.HttpRequest request = HTTP.get("http://weixin.sogou.com/weixin", params, true);
+            String html = request.body();
+            Document doc = Jsoup.parse(html);
+            Elements elements = doc.getElementsByClass("news-list").get(0).children();
+            for (Element element : elements) {
+                String eTitle = element.getElementsByTag("h3").text().replaceAll("(?i)[^a-zA-Z0-9\u4E00-\u9FA5]", "");
+                if (eTitle.equals(title.replaceAll("(?i)[^a-zA-Z0-9\u4E00-\u9FA5]", ""))
+                        && element.getElementsByClass("account").get(0).text().equals(name)) {
+                    //获取articleId
+                    String articleId = element.attr("id");
 
-                String[] articleIds = articleId.split("_box_");
-                //获取元素id前缀
-                String idPrefix = articleIds[0];
-                //获取id后缀
-                String idSuffix = articleIds[1];
+                    String[] articleIds = articleId.split("_box_");
+                    //获取元素id前缀
+                    String idPrefix = articleIds[0];
+                    //获取id后缀
+                    String idSuffix = articleIds[1];
 
-                if (null != idSuffix) {
-                    //根据sogou获取封面图片地址
-                    String cover = doc.getElementById(idPrefix + "_img_" + idSuffix).getElementsByTag("img").attr("src");
-                    String[] querys = URLUtils.getURL(cover).getQuery().split("&");
-                    for (String query : querys) {
-                        if (query.startsWith("url=")) {
-                            //根据sogou图片地址url参数获取封面图片
-                            cover = query.replace("url=", "");
-                            break;
+                    if (null != idSuffix) {
+                        //根据sogou获取封面图片地址
+                        String cover = doc.getElementById(idPrefix + "_img_" + idSuffix).getElementsByTag("img").attr("src");
+                        String[] querys = URLUtils.getURL(cover).getQuery().split("&");
+                        if (querys.length > 0) {
+                            for (String query : querys) {
+                                if (query.startsWith("url=")) {
+                                    //根据sogou图片地址url参数获取封面图片
+                                    cover = query.replace("url=", "");
+                                    break;
+                                }
+                            }
                         }
+                        //获取简介
+                        String digest = doc.getElementById(idPrefix + "_summary_" + idSuffix).text();
+                        articleDto.setCover(cover);
+                        articleDto.setDigest(digest);
                     }
-
-                    //获取简介
-                    String digest = doc.getElementById(idPrefix + "_summary_" + idSuffix).text();
-                    articleDto.setCover(cover);
-                    articleDto.setDigest(digest);
+                    return articleDto;
                 }
-                return articleDto;
             }
         }
         return articleDto;

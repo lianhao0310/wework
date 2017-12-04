@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -25,6 +26,7 @@ import java.io.OutputStream;
 @Api(tags = "图片服务")
 @Validated
 @Controller
+@ApiIgnore
 @RequestMapping("/image")
 public class ImageController {
     private final Logger log = LOG.getLogger(ImageController.class);
