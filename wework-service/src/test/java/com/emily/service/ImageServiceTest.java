@@ -1,6 +1,7 @@
 package com.emily.service;
 
 import com.emily.WeworkServiceApplicationTests;
+import com.emily.constant.Constants;
 import net.coobird.thumbnailator.Thumbnails;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,5 +64,11 @@ public class ImageServiceTest {
         g.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null);
         g.dispose();
         return scaledBI;
+    }
+
+    @Test
+    public void testFmt() {
+        String fmt = "image.jpg";
+        System.out.println(fmt.matches(Constants.IMAGE_PATTERN));
     }
 }

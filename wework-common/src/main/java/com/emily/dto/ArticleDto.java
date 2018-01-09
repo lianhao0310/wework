@@ -17,4 +17,5 @@ public class ArticleDto {
     private String source;
     private List<String> images;
     private List<String> videos;
+
 }

@@ -29,9 +29,9 @@ public class SogouServiceImpl implements SogouService {
         params.put("query", title);
         params.put("ie", "utf8");
         params.put("_sug_", "n");
-        String[] pages = {"1","2","3","4","5"};
+        String[] pages = {"1", "2", "3", "4", "5"};
         ArticleDto articleDto = new ArticleDto();
-        for (String page:pages){
+        for (String page : pages) {
             params.put("page", page);
             HTTP.HttpRequest request = HTTP.get("http://weixin.sogou.com/weixin", params, true);
             String html = request.body();
